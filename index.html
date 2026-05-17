@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Play a game with me</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            background-color: #050508;
+            color: #00ffcc;
+            font-family: 'Courier New', Courier, monospace;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            overflow-y: auto;
+        }
+
+        .card {
+            background-color: #0d1117;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 0 25px rgba(0, 255, 204, 0.15);
+            text-align: center;
+            max-width: 650px;
+            width: 100%;
+            transition: all 0.5s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid #1f2937;
+        }
+
+        h1 {
+            font-size: 2.3rem;
+            margin-bottom: 20px;
+            color: #fff;
+            letter-spacing: 2px;
+        }
+
+        p {
+            font-size: 1.1rem;
+            color: #8b949e;
+            margin-bottom: 30px;
+        }
+
+        .instruction {
+            font-size: 0.9rem;
+            color: #ff4444;
+            margin-top: -15px;
+            margin-bottom: 25px;
+            font-weight: bold;
+            line-height: 1.5;
+            background: rgba(255, 68, 68, 0.1);
+            padding: 10px;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 68, 68, 0.2);
+        }
+
+        .question-text {
+            font-size: 1.5rem;
+            color: #fff;
+            margin-bottom: 30px;
+            font-weight: bold;
+            line-height: 1.4;
+        }
+
+        .highlight-text, .highlight-time, .highlight-date {
+            color: #00ffcc;
+            text-decoration: underline;
+        }
+        
+        .highlight-time, .highlight-date, .danger-glow {
+            color: #ff3333;
+            font-size: 1.8rem;
+            text-shadow: 0 0 10px rgba(255, 51, 51, 0.3);
+        }
+
+        .breach-timestamp {
+            color: #ff3333;
+            font-size: 1.1rem;
+            font-weight: bold;
+            letter-spacing: 2px;
+            margin-top: 15px;
+            background: rgba(255, 0, 0, 0.15);
+            padding: 10px 15px;
+            border-radius: 5px;
+            display: inline-block;
+            border: 1px solid rgba(255, 0, 0, 0.3);
+            line-height: 1.5;
+        }
+
+        input[type="text"] {
+            width: 85%;
+            padding: 14px;
+            font-size: 1.1rem;
+            border: 2px solid #00ffcc;
+            background: #050508;
+            color: #fff;
+            border-radius: 6px;
+            outline: none;
+            text-align: center;
+            margin-bottom: 20px;
+            letter-spacing: 1px;
+        }
+
+        .btn-container {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        button {
+            background-color: #00ffcc;
+            color: #050508;
+            border: none;
+            padding: 14px 35px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: 0.2s ease-in-out;
+            letter-spacing: 1px;
+        }
+
+        button:hover {
+            background-color: transparent;
+            color: #00ffcc;
+            border: 2px solid #00ffcc;
+            box-shadow: 0 0 15px rgba(0, 255, 204, 0.4);
+        }
+
+        .btn-decline {
+            background-color: #21262d;
+            color: #c9d1d9;
+            border: 1px solid #30363d;
+        }
+        .btn-decline:hover {
+            background-color: #ff4444;
+            color: #fff;
+            border: 2px solid #ff4444;
+            box-shadow: 0 0 15px rgba(255, 68, 68, 0.4);
+        }
+
+        /* Neon Horror Green Terminal Log */
+        .log-container {
+            text-align: left;
+            background: #000;
+            padding: 18px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            color: #00ff33; 
+            height: 350px;
+            overflow-y: hidden;
+            border: 1px solid #00ff33;
+            margin-bottom: 20px;
+            font-weight: bold;
+            box-shadow: inset 0 0 10px rgba(0, 255, 51, 0.2);
+        }
+
+        .log-line {
+            margin: 6px 0;
+            opacity: 0;
+            animation: fadeIn 0.1s forwards;
+        }
+
+        /* Hidden States initially */
+        .hidden-stage {
+            display: none;
+        }
+
+        /* Extreme Scare Screen Style */
+        .scare-body {
+            background-color: #000 !important;
+            color: #ff0000 !important;
+        }
+        .scare-text {
+            font-size: 2.3rem;
+            color: #ff0000;
+            font-weight: 900;
+            animation: shake 0.3s infinite;
+            line-height: 1.4;
+            letter-spacing: -0.5px;
+            text-shadow: 0 0 20px rgba(255, 0, 0, 0.8);
+        }
+        .reveal-btn {
+            background-color: #ff0000;
+            color: #000;
+            margin-top: 45px;
+            border: none;
+        }
+        .reveal-btn:hover {
+            background-color: #fff;
+            color: #ff0000;
+            border: 2px solid #fff;
+            box-shadow: 0 0 25px #ff0000;
+        }
+
+        @keyframes fadeIn {
+            to { opacity: 1; }
+        }
+
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+
+        @keyframes shake {
+            0% { transform: translate(2px, 1px) rotate(0deg); }
+            20% { transform: translate(-3px, -1px) rotate(-1deg); }
+            40% { transform: translate(-1px, 2px) rotate(1deg); }
+            60% { transform: translate(2px, 1px) rotate(-1deg); }
+            80% { transform: translate(-2px, -1px) rotate(1deg); }
+            100% { transform: translate(1px, 2px) rotate(0deg); }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Hidden canvas for fingerprint generation -->
+    <canvas id="fingerprintCanvas" width="200" height="20" style="display:none;"></canvas>
+
+    <!-- Reliable Direct Link Horror Track -->
+    <audio id="bg-horror-music" loop preload="auto">
+        <source src="https://www.soundhelix.com/examples/mp3/SoundHelix-Song-16.mp3" type="audio/mpeg">
+    </audio>
+
+    <div class="card" id="main-card">
+        
+        <!-- STAGE 0: The Trap Input -->
+        <div id="start-screen">
+            <h1>Play a game with me</h1>
+            <p>To begin the trial, please enter your name below.</p>
+            <div class="instruction">
+                ⚠️ CRITICAL REQUIREMENT:<br>
+                Name must be your REAL, FULL name including your SURNAME.<br>
+                Single names, initials, or fake names will fail system verification.
+            </div>
+            <input type="text" id="username" placeholder="First Name and Surname..." autocomplete="off">
+            <br>
+            <button onclick="validateAndStart()">PROCEED</button>
+        </div>
+
+        <!-- STAGE 1: Confirm 1 -->
+        <div id="confirm-1" class="hidden-stage">
+            <h1>Identity Check</h1>
+            <div class="question-text">Is <span class="highlight-text display-name"></span> really your name?</div>
+            <button onclick="goToStage(1, 2)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 2: Confirm 2 -->
+        <div id="confirm-2" class="hidden-stage">
+            <h1>Security Check</h1>
+            <div class="question-text">Are you absolutely sure?</div>
+            <p style="color: #ff4444; font-weight: bold;">Falsifying credentials will result in strict penalties.</p>
+            <button onclick="goToStage(2, 3)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 3: Clock Sync -->
+        <div id="confirm-3" class="hidden-stage">
+            <h1>Temporal Sync</h1>
+            <div class="question-text">Look at your device. Is your internal system clock currently showing exactly <span class="highlight-time" id="live-clock"></span>?</div>
+            <p style="color: #8b949e;">Time matrix variance must match our central monitoring node.</p>
+            <button onclick="goToStage(3, 4)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 4: Live Date Check -->
+        <div id="confirm-4" class="hidden-stage">
+            <h1>Calendar Validation</h1>
+            <div class="question-text">Is today's date currently recorded as <span class="highlight-date" id="live-date"></span> on your operating system?</div>
+            <p style="color: #ff4444;">Expired token configurations will result in an immediate handshake refusal.</p>
+            <button onclick="goToStage(4, 5)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 5: Time Warning -->
+        <div id="confirm-5" class="hidden-stage">
+            <h1>Chronology Lock</h1>
+            <div class="question-text">Do you realize that your entire session baseline has been logged at exactly this second?</div>
+            <p style="color: #ff4444;">Any attempt to alter your system timezone now will drop the connection.</p>
+            <button onclick="goToStage(5, 6)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 6: Environmental Architecture Check -->
+        <div id="confirm-6" class="hidden-stage">
+            <h1>Hardware Identification</h1>
+            <div class="question-text">Our node recognizes your platform architecture environment. Is your device currently processing using <span class="danger-glow" id="detected-os">Analyzing Core Architecture...</span>?</div>
+            <p style="color: #8b949e;">Dynamic canvas rendering profiles must match local kernel calls.</p>
+            <button onclick="goToStage(6, 7)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 7: Verification Code Request -->
+        <div id="confirm-7" class="hidden-stage">
+            <h1>Hardware Fingerprint Match</h1>
+            <div class="question-text">To prevent automated sandbox detection scripts, match your device's unique GPU signature token below:</div>
+            <p style="font-size: 1.1rem; font-weight: bold; color: #00ffcc; word-break: break-all;" id="generated-hash">GENERATING SIGNATURE...</p>
+            <button id="hash-btn" onclick="generateFingerprintToken()">QUERY HARDWARE SIGNATURE</button>
+            <button id="hash-proceed" class="hidden-stage" onclick="goToStage(7, 8)">PROCEED</button>
+        </div>
+
+        <!-- STAGE 8: Yes/No Q1 - Network -->
+        <div id="confirm-8" class="hidden-stage">
+            <h1>Security Parameter [Node_01]</h1>
+            <div class="question-text">Are you currently connecting from your primary, unregistered home network routing endpoint?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(8, 9)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('Network validation forced.', 8, 9)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 9: Yes/No Q2 - Resolution -->
+        <div id="confirm-9" class="hidden-stage">
+            <h1>Device Integrity [Node_02]</h1>
+            <div class="question-text">Is the physical hardware panel display currently configured to a resolution layout of <span class="highlight-text" id="detected-resolution">Scanning display...</span>?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(9, 10)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('Display alignment synchronized by override.', 9, 10)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 10: Yes/No Q3 - Interface Input Type -->
+        <div id="confirm-10" class="hidden-stage">
+            <h1>Peripheral Analysis [Node_03]</h1>
+            <div class="question-text">Our systemic sweep reports your baseline peripheral controls as: <span class="highlight-text" id="detected-touch">Checking input hardware...</span>. Is this assessment correct?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(10, 11)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('Hardware verification overrode baseline logs.', 10, 11)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 11: Yes/No Q4 - Storage -->
+        <div id="confirm-11" class="hidden-stage">
+            <h1>Storage Authorization [Node_04]</h1>
+            <div class="question-text">Do you authorize this script module to scan browser session indexes for cache file optimization?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(11, 12)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('System warning: Authorization mandatory. Manual pass injection generated.', 11, 12)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 12: Yes/No Q5 - Latency Check -->
+        <div id="confirm-12" class="hidden-stage">
+            <h1>Data Flow Latency [Node_05]</h1>
+            <div class="question-text">Is your active system proxy background pipeline operating at a structural latency delay below 45ms?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(12, 13)">YES</button>
+                <button onclick="goToStage(12, 13)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 13: Yes/No Q6 - Administration Kernel -->
+        <div id="confirm-13" class="hidden-stage">
+            <h1>Privilege Elevation [Node_06]</h1>
+            <div class="question-text">Has this host system been subjected to unofficial administrative kernel patches within the last 90 clock cycles?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(13, 14)">YES</button>
+                <button onclick="goToStage(13, 14)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 14: Yes/No Q7 - Biometrics Optical focus -->
+        <div id="confirm-14" class="hidden-stage">
+            <h1>Biometric Verification [Node_07]</h1>
+            <div class="question-text">Can you confirm that you are looking directly at the device display matrix right now?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(14, 15)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('Optical focus variance detected. Recalibrating tracking canvas...', 14, 15)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 15: Yes/No Q8 - Risk acknowledgment -->
+        <div id="confirm-15" class="hidden-stage">
+            <h1>Session Termination Risk [Node_08]</h1>
+            <div class="question-text">Do you understand that any attempt to forcibly terminate this frame session will lock local thread handling profiles?</div>
+            <div class="btn-container">
+                <button onclick="goToStage(15, 16)">YES</button>
+                <button class="btn-decline" onclick="handleDeclineQ('Escape vectors blocked by script configuration.', 15, 16)">NO</button>
+            </div>
+        </div>
+
+        <!-- STAGE 16: Final Verification Frame -->
+        <div id="confirm-16" class="hidden-stage">
+            <h1>Final Verification</h1>
+            <div class="question-text">Is <span class="highlight-text display-name"></span> your official legal full name?</div>
+            <p>This is your last chance to turn back.</p>
+            <div class="btn-container">
+                <button class="btn-decline" onclick="declinePrank()">DECLINE</button>
+                <button onclick="triggerHackerSequence()">PROCEED</button>
+            </div>
+        </div>
+
+        <!-- STAGE 17: Ultra-Extended Green Data Breaching Sequence -->
+        <div id="loading-screen" class="hidden-stage">
+            <h1 id="loading-title" style="color: #00ff33; text-shadow: 0 0 10px rgba(0,255,51,0.5);">EXPLOIT PROTOCOL INITIATED</h1>
+            <div class="log-container" id="log-box">
+                <!-- Massive data dump stream drops sequentially here -->
+            </div>
+            <p id="loading-subtitle" style="color: #ff4444; font-size: 1.1rem; font-weight: bold; animation: blink 0.6s infinite;">⚠️ SYSTEM OVERRIDE IN PROGRESS...</p>
+        </div>
+
+        <!-- STAGE 18: The Custom Hacked Reveal Screen -->
+        <div id="scare-screen" class="hidden-stage">
+            <div class="scare-text">⚠️ WARNING ⚠️<br>THE DEVICE OF <span id="victim-title-name"></span> HAS BEEN HACKED.</div>
+            <div class="breach-timestamp" id="hack-timestamp">
+                LOG PROTOCOL SECURE<br>
+                TIME: --:--:-- --<br>
+                DATE: ----------
+            </div>
+            <p style="color: #555; margin-top: 25px; font-weight: bold; letter-spacing: 2px;">ALL SYSTEM ENCRYPTION PROTOCOLS CORRUPTED.</p>
+            <button class="reveal-btn" onclick="revealPrank()">PROCEED</button>
+        </div>
+    </div>
+
+    <script>
+        let globalName = "";
+        const horrorMusic = document.getElementById('bg-horror-music');
+
+        function getFormattedTime() {
+            const now = new Date();
+            let hours = now.getHours();
+            let minutes = now.getMinutes();
+            let seconds = now.getSeconds();
+            const ampm = hours >= 12 ? 'PM' : 'AM';
+            hours = hours % 12;
+            hours = hours ? hours : 12;
+            minutes = minutes < 10 ? '0' + minutes : minutes;
+            seconds = seconds < 10 ? '0' + seconds : seconds;
+            return hours + ':' + minutes + ':' + seconds + ' ' + ampm;
+        }
+
+        function getFormattedDate() {
+            const now = new Date();
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            return now.toLocaleDateString('en-US', options);
+        }
+
+        function detectDeviceEnvironment() {
+            const ua = navigator.userAgent;
+            let os = "Unknown Core Architecture";
+            let browser = "Web Render Thread";
+            const logicalCores = navigator.hardwareConcurrency || "Multi-Threaded";
+
+            if (ua.indexOf("Win") !== -1) os = "Windows Platform";
+            if (ua.indexOf("Mac") !== -1) os = "macOS UNIX Environment";
+            if (ua.indexOf("X11") !== -1) os = "Linux Kernel Node";
+            if (ua.indexOf("Linux") !== -1) os = "Android Linux Engine";
+            if (/iPhone|iPad|iPod/.test(ua)) os = "iOS Hardware Infrastructure";
+
+            if (ua.indexOf("Chrome") !== -1) browser = "Google Chrome Kernel";
+            else if (ua.indexOf("Safari") !== -1) browser = "Apple WebKit Safari";
+            else if (ua.indexOf("Firefox") !== -1) browser = "Mozilla Firefox Architecture";
+            else if (ua.indexOf("Edge") !== -1) browser = "Microsoft Edge Engine";
+
+            const element = document.getElementById('detected-os');
+            if(element) {
+                element.innerText = `${os} (${logicalCores}-Core System Array) running ${browser}`;
+            }
+
+            const resElement = document.getElementById('detected-resolution');
+            if(resElement) {
+                resElement.innerText = window.screen.width + "x" + window.screen.height + " UI Layout Mesh";
+            }
+
+            // Real Touch Hardware Input Capability Query
+            const touchElement = document.getElementById('detected-touch');
+            if(touchElement) {
+                const hasTouch = ('ontouchstart' in window) || (navigator.maxTouchPoints > 0);
+                touchElement.innerText = hasTouch ? "Touch Interface Inputs Detected" : "Mouse/Pointer Input Interface Mapped";
+            }
+        }
+
+        function generateFingerprintToken() {
+            if (horrorMusic) horrorMusic.play().catch(() => {});
+            try {
+                const canvas = document.getElementById("fingerprintCanvas");
+                const ctx = canvas.getContext("2d");
+                ctx.textBaseline = "top";
+                ctx.font = "14px 'Arial'";
+                ctx.fillText("Jekhi_Rabha_Prank_Engine_Auth", 2, 15);
+                const ctxString = canvas.toDataURL();
+                let hashValue = 0;
+                for (let i = 0; i < ctxString.length; i++) {
+                    hashValue = (hashValue << 5) - hashValue + ctxString.charCodeAt(i);
+                    hashValue |= 0;
+                }
+                document.getElementById('generated-hash').innerText = "GPU-HWID-HEX::" + Math.abs(hashValue).toString(16).toUpperCase();
+            } catch(e) {
+                document.getElementById('generated-hash').innerText = "GPU-HWID-HEX::B4E9A710C3F2D4E";
+            }
+            document.getElementById('hash-btn').style.display = 'none';
+            document.getElementById('hash-proceed').style.display = 'inline-block';
+        }
+
+        function updateLiveMetadata() {
+            const clockElement = document.getElementById('live-clock');
+            if(clockElement) {
+                const longTime = getFormattedTime();
+                const shortTime = longTime.split(':')[0] + ':' + longTime.split(':')[1] + ' ' + longTime.split(' ')[1];
+                clockElement.innerText = shortTime;
+            }
+            const dateElement = document.getElementById('live-date');
+            if(dateElement) {
+                dateElement.innerText = getFormattedDate();
+            }
+            detectDeviceEnvironment();
+        }
+
+        function validateAndStart() {
+            const nameInput = document.getElementById('username').value.trim();
+            const fakeNames = ["asdf", "xyz", "abc", "none", "admin", "test", "fake", "user", "someone", "nobody"];
+
+            if (nameInput === "") {
+                alert("You cannot escape the game. Enter your full name.");
+                return;
+            }
+
+            const nameParts = nameInput.split(/\s+/);
+
+            if (nameParts.length < 2) {
+                alert("Verification Failed: Invalid format. Please enter your FULL name, including your surname.");
+                return;
+            }
+
+            let containsFakeWord = false;
+            nameParts.forEach(part => {
+                if (fakeNames.includes(part.toLowerCase()) || part.length < 2) {
+                    containsFakeWord = true;
+                }
+            });
+
+            if (containsFakeWord) {
+                alert("Error: Verification failed. Real legal names only.");
+                return;
+            }
+
+            globalName = nameInput;
+            
+            const nameDisplays = document.querySelectorAll('.display-name');
+            nameDisplays.forEach(element => {
+                element.innerText = globalName;
+            });
+            
+            document.getElementById('victim-title-name').innerText = globalName.toUpperCase();
+
+            updateLiveMetadata();
+
+            if (horrorMusic) {
+                horrorMusic.volume = 0.85;
+                horrorMusic.play().catch(e => console.log("Sound tracking initialized."));
+            }
+
+            document.getElementById('start-screen').style.display = 'none';
+            document.getElementById('confirm-1').style.display = 'block';
+        }
+
+        function goToStage(current, next) {
+            if (horrorMusic) horrorMusic.play().catch(() => {});
+            updateLiveMetadata();
+            document.getElementById(`confirm-${current}`).style.display = 'none';
+            document.getElementById(`confirm-${next}`).style.display = 'block';
+        }
+
+        function handleDeclineQ(alertMessage, current, next) {
+            alert("ALERT: " + alertMessage);
+            goToStage(current, next);
+        }
+
+        function declinePrank() {
+            alert("CRITICAL OVERRIDE: Escape path terminated. Automatic hardware tracing activated...");
+            triggerHackerSequence();
+        }
+
+        function triggerHackerSequence() {
+            if (horrorMusic) horrorMusic.play().catch(() => {});
+            document.getElementById('confirm-16').style.display = 'none';
+            document.getElementById('loading-screen').style.display = 'block';
+
+            const logBox = document.getElementById('log-box');
+            
+            const fakeIP = `${Math.floor(Math.random() * 140) + 110}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}.${Math.floor(Math.random() * 254)}`;
+            const fakeDNS = `ns1.gateway-leak-${Math.floor(Math.random() * 900) + 100}.net`;
+            const fakeLat = (Math.random() * (40.0 - 30.0) + 30.0).toFixed(4);
+            const fakeLong = (Math.random() * (-80.0 - -110.0) + -110.0).toFixed(4);
+
+            // Maximized 25-Line High-fidelity Terminal Sequence Stream Timeline
+            const dataStream = [
+                { text: `[STAGE 1] Allocating sandbox staging pointers inside heap layout...`, delay: 100 },
+                { text: `[STAGE 1] Injecting browser memory allocation hook scripts...`, delay: 400 },
+                { text: `[STAGE 2] Resolving remote routing gateway infrastructure metrics...`, delay: 800 },
+                { text: `[STAGE 2] Target IPv4 Address Intercepted successfully -> [ ${fakeIP} ]`, delay: 1300 },
+                { text: `[STAGE 3] Bypassing proxy server configurations via domain jump...`, delay: 1900 },
+                { text: `[STAGE 3] Pinging geocoding server arrays... GPS: (${fakeLat}, ${fakeLong})`, delay: 2500 },
+                { text: `[STAGE 4] Querying core processing fabrics and system state structures...`, delay: 3100 },
+                { text: `[STAGE 4] Accessing local browser user database partitions... Mapped.`, delay: 3800 },
+                { text: `[LEAK] browser_cookie_cache.cfg -> 12,410 secure strings extracted.`, delay: 4500 },
+                { text: `[LEAK] saved_passwords_vault.bak -> Compiling data block offsets...`, delay: 5200 },
+                { text: `[PORT MAP] Scanning local interface interfaces... Open lines: 22, 80, 443, 8080`, delay: 5900 },
+                { text: `[STAGE 5] Unmounting system security file monitors... Done.`, delay: 6600 },
+                { text: `[LEAK] secure_documents_registry.json -> PACKAGED SUCCESS.`, delay: 7300 },
+                { text: `[LEAK] private_multimedia_vault.zip -> INITIALIZING BLOCK EXPORT...`, delay: 8000 },
+                { text: `[STAGE 6] Hooking local peripheral processing arrays... Link active.`, delay: 8700 },
+                { text: `[WEBCAM] Camera shader mapping synchronized onto screen focal bounding box.`, delay: 9500 },
+                { text: `[STORAGE] Reading host machine operating directory paths (C:/Users/)...`, delay: 10300 },
+                { text: `[DUMP] Packaging local AppData/Roaming database logs... Verified.`, delay: 11100 },
+                { text: `[STAGE 7] Comparing hardware signature profiles with cloud directory logs...`, delay: 12000 },
+                { text: `[INJECTION] Deploying secondary root memory persistence: backdoor_payload_x64.bin`, delay: 12900 },
+                { text: `[OVERRIDE] Overwriting boot sector layout keys... Pipeline locked.`, delay: 13800 },
+                { text: `[SYNC] Clearing browser history trace objects across active frames...`, delay: 14700 },
+                { text: `[NETWORK] Forcing deep socket tunnel routing payload... Done.`, delay: 15600 },
+                { text: `[EXPLOIT] Injecting local environment buffer strings into kernel frame...`, delay: 16500 },
+                { text: `[CRITICAL] System access fully compromised. Terminating terminal interactive session.`, delay: 17400 }
+            ];
+
+            dataStream.forEach(log => {
+                setTimeout(() => {
+                    const line = document.createElement('div');
+                    line.className = 'log-line';
+                    line.innerText = log.text;
+                    logBox.appendChild(line);
+                    logBox.scrollTop = logBox.scrollHeight;
+                }, log.delay);
+            });
+
+            const totalDelay = 18400; // Expanded delay loop timer block for ultimate buildup duration
+
+            setTimeout(() => {
+                document.getElementById('hack-timestamp').innerHTML = `
+                    LOG PROTOCOL SECURE<br>
+                    TIME: ${getFormattedTime()}<br>
+                    DATE: ${getFormattedDate()}
+                `;
+
+                document.getElementById('loading-screen').style.display = 'none';
+                document.getElementById('scare-screen').style.display = 'block';
+                
+                document.body.classList.add('scare-body');
+                document.getElementById('main-card').style.backgroundColor = '#000';
+                document.getElementById('main-card').style.boxShadow = '0 0 40px rgba(255, 0, 0, 0.6)';
+                document.getElementById('main-card').style.borderColor = '#ff0000';
+                document.title = "SYSTEM FAULT";
+            }, totalDelay);
+        }
+
+        function revealPrank() {
+            if (horrorMusic) {
+                horrorMusic.pause();
+                horrorMusic.currentTime = 0;
+            }
+
+            document.body.classList.remove('scare-body');
+            document.body.style.backgroundColor = "#e6f4ea";
+            
+            const card = document.getElementById('main-card');
+            card.style.backgroundColor = "#fff";
+            card.style.color = "#137333";
+            card.style.boxShadow = "none";
+            card.style.borderColor = "#a8dab5";
+            
+            card.innerHTML = `
+                <h1 style="color: #1e8e3e;">🎉 GOTCHA! 🎉</h1>
+                <p style="color: #137333; font-size: 1.3rem; font-weight: bold; margin-bottom: 15px;">Made by Jekhi Rabha</p>
+                <div style="text-align: left; color: #137333; line-height: 1.6; background: #f1f9f3; padding: 20px; border-radius: 8px; border: 1px solid #c2e7cc;">
+                    <p style="margin: 0 0 10px 0; color: #155724; font-weight: bold;">🔒 Important Safety Notice:</p>
+                    Relax, <b>${globalName}</b>! This is just a <b>completely harmless prank</b>. 
+                    <br><br>
+                    From a technical standpoint, <b>it is impossible to hack a device just by typing a name into a website.</b>
+                    <br><br>
+                    Web browsers keep websites trapped inside a safe, isolated box called a "sandbox." A basic website cannot look at your personal files, look through your webcam, download viruses, or access your system. 
+                    <br><br>
+                    All the scary green coding lines, your device type, input touch layout parameters, screen resolution, and live clock records were completely fake! The website simply used basic, safe information that every browser shares with every website you visit. 
+                    <br><br>
+                    Your phone, computer, files, and personal data are <b>100% safe and completely untouched</b>!
+                </div>
+                <button onclick="location.reload()" style="background-color: #1e8e3e; color: white; margin-top: 25px;">Play Again</button>
+            `;
+            document.title = "Pranked! 😂";
+        }
+    </script>
+</body>
+</html>
